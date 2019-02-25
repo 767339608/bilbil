@@ -10,27 +10,52 @@
       </section>
       <div class="datechage">
         <div class="thisdata">
-          <span>三日</span>
+          <span ref='spantext'>{{spantaday}}</span>
           <i></i>
         </div>
-        <p>一周</p>
+        <p ref='ptext'
+           @click='toggle()'>{{ptaday}}</p>
       </div>
     </div>
-    <ul class="animation-main">
-      <li v-for="(li,index) in animationasidevalue"
-          :key='index'>
-        <i :class="{changecolor:index>2}">{{index+1}}</i>
-        <template v-if='index<1'>
-          <img :src="li.img"
-               alt="">
-          <section>
-            <h3>{{li.h3}}</h3>
-            <p>{{li.p}}</p>
-          </section>
-        </template>
-        <h3 v-else>{{li.h3}}</h3>
-      </li>
-    </ul>
+    <div class="listoverhidden">
+      <div class="list"
+           ref='list'>
+        <ul class="animation-main">
+          <router-link :to="{name:'media',params:{h1:animationasidevalue.title,view:animationasidevalue.view,dmall:animationasidevalue.dmall,media:animationasidevalue.media}}"
+                       tag="li"
+                       v-for="(li,index) in animationasidevalue"
+                       :key='index'>
+            <i :class="{changecolor:index>2}">{{index+1}}</i>
+            <template v-if='index<1'>
+              <img :src="li.img"
+                   alt="">
+              <section>
+                <h3>{{li.h3}}</h3>
+                <p>{{li.p}}</p>
+              </section>
+            </template>
+            <h3 v-else>{{li.h3}}</h3>
+          </router-link>
+        </ul>
+        <ul class="animation-main">
+          <router-link :to="{name:'media',params:{h1:animationsideOriginal.title,view:animationsideOriginal.view,dmall:animationsideOriginal.dmall,media:animationsideOriginal.media}}"
+                       tag="li"
+                       v-for="(li,index) in animationsideOriginal"
+                       :key='index'>
+            <i :class="{changecolor:index>2}">{{index+1}}</i>
+            <template v-if='index<1'>
+              <img :src="li.img"
+                   alt="">
+              <section>
+                <h3>{{li.h3}}</h3>
+                <p>{{li.p}}</p>
+              </section>
+            </template>
+            <h3 v-else>{{li.h3}}</h3>
+          </router-link>
+        </ul>
+      </div>
+    </div>
   </aside>
 </template>
 <style lang="less" scoped>
@@ -110,6 +135,15 @@
       }
     }
   }
+  .listoverhidden {
+    width: 100%;
+    overflow: hidden;
+  }
+  .list {
+    display: flex;
+    width: 520px;
+    transition: 0.4s;
+  }
   .animation-main {
     padding-bottom: 15px;
     padding-top: 20px;
@@ -182,15 +216,54 @@
 <script>
 export default {
   name: 'aniamtionaside',
-  props: ['animationasidevalue'],
+  props: ['animationasidevalue', 'animationsideOriginal', 'animationsideweek'],
+  data () {
+    return {
+      spantaday: '三日',
+      ptaday: '一周',
+      animationthree: {}
+    }
+  },
+  mounted: function () {
+    this.animationthree = this.animationasidevalue
+  },
   methods: {
     changedata: function (ev) {
       let target = ev.target
       for (let index = 0; index < target.parentNode.children.length; index++) {
         target.parentNode.children[index].className = ''
       }
-      target.className = 'on'
+      if (target.nodeName === 'SPAN') {
+        target.className = 'on'
+        if (target.innerText === '全部') {
+          this.$refs.list.style.transform = 'translateX(-260px)'
+        } else {
+          this.$refs.list.style.transform = 'translateX(0)'
+        }
+      }
+    },
+    toggle () {
+      // console.log(this.spantaday)
+      // console.log(this.animationasidevalue)
+      if (this.spantaday === '一周') {
+        this.spantaday = '三日'
+        this.ptaday = '一周'
+        this.animationasidevalue = this.animationthree
+        this.animationsideOriginal = this.animationthree
+      } else {
+        this.animationasidevalue = this.animationsideweek
+        this.animationsideOriginal = this.animationsideweek
+        this.spantaday = '一周'
+        this.ptaday = '三日'
+      }
     }
+    // original () {
+    //   if (this.animationsideoriginal === 1) {
+    //     return this.animationasidevalue
+    //   } else {
+    //     return this.animationsideOriginal
+    //   }
+    // }
   }
 }
 
