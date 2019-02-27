@@ -212,7 +212,6 @@
   }
 }
 </style>
-
 <script>
 export default {
   name: 'aniamtionaside',
@@ -228,6 +227,7 @@ export default {
     this.animationthree = this.animationasidevalue
   },
   methods: {
+    // 日期切换点击事件
     changedata: function (ev) {
       let target = ev.target
       for (let index = 0; index < target.parentNode.children.length; index++) {
@@ -242,9 +242,9 @@ export default {
         }
       }
     },
+    // 切换
     toggle () {
-      // console.log(this.spantaday)
-      // console.log(this.animationasidevalue)
+      // console.log(this.animationsideOriginal)
       if (this.spantaday === '一周') {
         this.spantaday = '三日'
         this.ptaday = '一周'
@@ -257,13 +257,6 @@ export default {
         this.ptaday = '三日'
       }
     }
-    // original () {
-    //   if (this.animationsideoriginal === 1) {
-    //     return this.animationasidevalue
-    //   } else {
-    //     return this.animationsideOriginal
-    //   }
-    // }
   }
 }
 

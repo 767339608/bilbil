@@ -1,24 +1,45 @@
 <template>
   <div id="app">
     <span class="icon iconfont icon-yingbi"></span>
-    <v-header :succeed='succeed'></v-header>
-    <v-main></v-main>
+    <v-header :succeed='succeed'
+              @quit="quit"></v-header>
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
 import heade from '@/components/header'
-import mainer from '@/components/main'
+import maine from '@/components/main'
 export default {
   name: 'App',
   data () {
     return {
-      succeed: false
+      succeed: {
+        verify: true,
+        usename: '来往风尘客',
+        rank: '大会员',
+        money: 999,
+        level: '5',
+        experience: '4499'
+      }
     }
   },
   components: {
     vHeader: heade,
-    vMain: mainer
+    vMain: maine
+  },
+  updated () {
+    // this.succeed.verify = this.$route.query.verify
+  },
+  computed: {
+    username () {
+      return this.$route.params.username
+    }
+  },
+  methods: {
+    quit () {
+      this.succeed.verify = false
+    }
   }
 }
 </script>

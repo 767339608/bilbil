@@ -4,12 +4,12 @@
       <nav>
         <ul>
           <li>
-            <a href="#">
+            <router-link to='/'>
               <svg class="icon">
                 <use xlink:href="#icon-dianshiju-"></use>
               </svg>
               主站
-            </a>
+            </router-link>
           </li>
           <li>
             <a href>画友</a>
@@ -40,7 +40,7 @@
         </ul>
       </nav>
       <aside>
-        <template v-if="succeed">
+        <template v-if="succeed.verify">
           <img src="static/images/3b87e950352ac65ca6c8fa3ffaf2b21192138aa9.jpg"
                alt=""
                class='heads headshover'
@@ -52,8 +52,8 @@
                @mouseleave='unheader()'>
             <article>
               <header class="driectory-header">
-                <h3 name="usename">去地西泮</h3>
-                <span name="rank">大会员</span>
+                <h3 name="usename">{{succeed.usename}}</h3>
+                <span name="rank">{{succeed.rank}}</span>
                 <!-- 存放的货币 -->
                 <div class="currency">
                   <div class="coin">
@@ -61,7 +61,7 @@
                          aria-hidden="true">
                       <use xlink:href="#icon-yingbi"></use>
                     </svg>
-                    <span>246</span>
+                    <span>{{succeed.money}}</span>
                   </div>
                   <div class="driectory-verify">
                     <div class="driectory-email">
@@ -84,7 +84,7 @@
                   <span>等级：</span>
                   <a href="#">
                     <div class="leveldot">
-                      <span>3</span>
+                      <span>{{succeed.level}}</span>
                     </div>
                     <!-- 进度条 -->
                     <div class="linear">
@@ -93,7 +93,7 @@
                   </a>
                 </div>
                 <!-- 经验 -->
-                <div class="experience">3302
+                <div class="experience">{{succeed.experience}}
                   <span>/4500</span>
                 </div>
               </header>
@@ -114,25 +114,28 @@
                   <li>
                     <a href>订单中心</a>
                   </li>
-                </ul>
+                </ul>>
               </div>
               <a class="esc"
-                 href='#'
-                 @click="esc()">退出</a>
+                 @click="quit">退出</a>
             </article>
           </div>
         </template>
         <template v-else>
-          <router-link to="/login">
-            <svg class="icon heads"
+          <router-link to="/login"
+                       tag='div'>
+            <div class='positionlogin'
                  @mouseenter="hovertologin"
                  @mouseleave="unhovertologin">
-              <use xlink:href="#icon-icontouxiang"></use>
-            </svg>
+              <svg class="icon heads">
+                <use xlink:href="#icon-icontouxiang"></use>
+              </svg>
+            </div>
           </router-link>
           <div class='tologin'
                @mouseenter="hovertologin"
-               @mouseleave="unhovertologin">
+               @mouseleave="unhovertologin"
+               style='display:none'>
             <p>登录之后你可以:</p>
             <div class="img">
               <img src="static/images/danmu.png"
@@ -142,12 +145,15 @@
                    alt=""
                    class='move'>
             </div>
-            <a href="">登录</a>
-            <p>首次使用？<a>点我去注册</a></p>
+            <router-link to='/login'>
+              登录
+            </router-link>
+            <p>首次使用？<router-link to='/register'>点我去注册</router-link>
+            </p>
           </div>
         </template>
         <ul class="personal-details">
-          <template v-if="succeed">
+          <template v-if="succeed.verify">
             <li>
               <a href>大会员</a>
             </li>
@@ -367,10 +373,15 @@
           background-color: #fb7299;
         }
       }
+      .positionlogin {
+        height: 45px;
+        display: flex;
+        align-items: center;
+      }
       .tologin {
         position: absolute;
         background: #fff;
-        left: 50%;
+        left: 5%;
         width: 320px;
         margin-left: -160px;
         padding: 12px;
@@ -390,6 +401,25 @@
             position: absolute;
             top: 0;
             left: 0;
+          }
+        }
+        & > a {
+          display: block;
+          height: 43px;
+          line-height: 43px;
+          text-align: center;
+          background: #00a1d6;
+          border-radius: 4px;
+          font-size: 14px;
+          color: #fff;
+        }
+        & > p:last-of-type {
+          margin-top: 8px;
+          text-align: center;
+          font-size: 12px;
+          color: #282828;
+          a {
+            color: #00a1d6;
           }
         }
       }
@@ -414,11 +444,16 @@ export default {
     this.index2 = 0
   },
   mounted: function () {
-    this.dom('tologin').style.display = 'none'
-    this.dom('move')[1].style.left = this.index + 'px'
-    this.time = setInterval(this.imgmove, 25)
+    if (this.dom('tologin')) {
+      this.dom('tologin').style.display = 'none'
+      this.dom('move')[1].style.left = this.index + 'px'
+      this.time = setInterval(this.imgmove, 25)
+    }
   },
   methods: {
+    quit () {
+      this.$emit('quit')
+    },
     // dom封装
     dom: function (value) {
       if (this.$el.getElementsByClassName(value).length > 1) {
@@ -440,6 +475,7 @@ export default {
     num: function (string) {
       return parseInt(string.substr(1))
     },
+    // index弹幕
     imgmove: function () {
       setTimeout(() => {
         this.index--
@@ -460,10 +496,8 @@ export default {
     },
     unhovertologin: function () {
       this.dom('tologin').style.display = 'none'
-    },
-    esc: function () {
-      console.log(this)
     }
   }
+
 }
 </script>

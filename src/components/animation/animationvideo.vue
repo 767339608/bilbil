@@ -1,167 +1,243 @@
 <template>
-  <div class="back-video"
-       @mousemove="backVideo($event)"
-       @mouseenter="seenterbarrgage($event)"
-       @mouseleave="leavebarrgage($event)"
-       :style="{ backgroundImage : 'url('+animationvideovalue.img +')'}">
-    <div class="
-       mask-shadow"></div>
-    <!-- 进度条 -->
-    <div class="bar"
-         style="display:none;">
-      <div class="progress"></div>
+  <div class="animation-left">
+    <div class="animation-title">
+      <div class="animation-title-left">
+        <figure><i></i>
+          <h1>动画</h1>
+        </figure>
+        <div class="animation-table"
+             @click='animationTable($event)'>
+          <span class='on'>最新动态</span>
+          <span>最新投稿</span>
+        </div>
+      </div>
+      <div class="animation-title-right">
+        <div class="refresh"
+             @click='clickfresh()'
+             ref='refresh'>
+          <i></i>
+          <span>{{newvideo}}</span>
+          <span>条新动态</span>
+        </div>
+        <a href=""
+           class="more">更多<i></i></a>
+      </div>
     </div>
-    <div class="danmu-module"
-         style="display:none;">
-      <!-- 弹幕 -->
-      <p class="dm"
-         v-for="(p,index) in animationvideovalue.ps"
-         :key='index'>{{p.text}}
-      </p>
-      <time>{{animationvideovalue.videotime}}</time>
-    </div>
-    <p class="mask-title"
-       title="video.title"></p>
+    <ul class="animation-video">
+      <!-- 动画 -->
+      <li v-for="(video , index) in animationchage(thistable)"
+          :key="index">
+        <v-Video :videovalue='video'
+                 :media="mediaall['0001']">
+        </v-Video>
+        <p class='video-title'>{{video.title}}</p>
+      </li>
+    </ul>
   </div>
+
 </template>
 <style lang="less" scoped>
-.back-video {
-  width: 160px;
-  height: 100px;
-  border-radius: 4px;
-  background-color: red;
-  margin: 0 20px 20px 0;
-  position: relative;
-  float: left;
-  cursor: pointer;
-  &:hover {
-    .mask-shadow {
-      opacity: 0.5;
+.flex {
+  display: flex;
+  justify-content: space-between;
+}
+.animation-title {
+  padding-right: 20px;
+  padding-bottom: 15px;
+  .flex();
+  .animation-title-left {
+    .flex();
+    width: 205px;
+    align-items: center;
+    figure {
+      .flex();
+    }
+    i {
+      display: inline-block;
+      background-position: -141px -908px;
+      margin-top: -10px;
+      margin-right: 10px;
+      width: 40px;
+      height: 40px;
+    }
+    span {
+      position: relative;
+      height: 20px;
+      cursor: pointer;
+      padding: 1px 0 2px;
+      border-bottom: 1px solid transparent;
+      transition: 0.2s;
+      display: inline-block;
+      line-height: 20px;
+      transition-property: border, color;
+      &:hover {
+        color: #00a1d6;
+      }
+    }
+    .on {
+      color: #00a1d6;
+      border-color: #00a1d6;
+      &:before {
+        display: block;
+        content: "";
+        left: 50%;
+        position: absolute;
+        margin-left: -3px;
+        bottom: 0;
+        width: 0;
+        height: 0;
+        border-bottom: 3px solid #00a1d6;
+        border-top: 0;
+        border-left: 3px dashed transparent;
+        border-right: 3px dashed transparent;
+      }
     }
   }
-  .danmu-module {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    top: -3px;
-    overflow: hidden;
-  }
-  .mask-title {
-    position: absolute;
-    width: 100%;
-    bottom: -48px;
-    height: 34px;
-    overflow: hidden;
-    word-wrap: break-word;
-    word-break: break-all;
-  }
-  .mask-shadow {
-    height: 100px;
-    width: 160px;
-    border-radius: 4px;
-    background-color: #6d757a;
-    opacity: 0;
-    position: absolute;
-  }
-  .bar {
-    width: 140px;
-    height: 3px;
-    margin: auto;
-    background-color: #000;
-    .progress {
-      width: 1px;
-      height: 3px;
-      background: grey;
-      float: left;
+  .animation-title-right {
+    .flex();
+    i {
+      vertical-align: middle;
+      width: 12px;
+      height: 13px;
+      display: inline-block;
+      background-position: -475px -89px;
+      transition: 0.2s;
+    }
+    .refresh {
+      border-radius: 4px;
+      border: 1px solid #ccd0d7;
+      height: 22px;
+      padding: 0 10px;
+      line-height: 22px;
+      margin-right: 10px;
+      cursor: pointer;
+      &:hover {
+        i {
+          transform: rotate(180deg);
+        }
+      }
+    }
+    a {
+      display: inline-block;
+      width: 52px;
+      height: 22px;
+      line-height: 22px;
+      background-color: #fff;
+      border: 1px solid #ccc0d7;
+      color: #555;
+      border-radius: 4px;
+      text-align: center;
+      transition: 0.2s;
+      &:hover {
+        background-color: #bbb;
+        i {
+          margin-left: 7px;
+        }
+      }
+      i {
+        width: 6px;
+        height: 12px;
+        margin: -2px 0 0;
+        background-position: -478px -218px;
+      }
     }
   }
-  time {
-    position: absolute;
-    left: 6px;
-    bottom: 6px;
-    color: white;
-  }
-  .dm {
-    color: #fff;
-    left: 100%;
-    position: absolute;
-    white-space: pre;
-    top: 8px;
-  }
-  .row2 {
-    top: 25px;
+}
+.animation-video {
+  flex-wrap: wrap;
+  .flex();
+  li {
+    height: 180px;
+    & > div {
+      height: 100px;
+    }
+    & > p {
+      width: 160px;
+    }
   }
 }
 </style>
+
 <script>
+import Video from '@/components/video'
 export default {
   name: 'animationvideo',
-  props: ['animationvideovalue'],
-  created: function () {
+  components: {
+    vVideo: Video
   },
-  mounted: function () {
-    this.k = 0
+  data () {
+    return {
+      animationbooler: 1,
+      opacity: 0,
+      tandata: [],
+      thistable: 0
+    }
   },
+  props: ['animationvideovalue', 'newanimationvideos', 'mediaall', 'newvideo'],
   methods: {
-    // 进度条事件
-    backVideo: function (ev) {
-      let current = ev.currentTarget || ev.srcElement
-      let progress = ev.clientX - current.offsetLeft
-      current.getElementsByClassName('progress')[0].style.width = progress + 'px'
-      if (Number(current.getElementsByClassName('progress')[0].offsetWidth) > 140) {
-        current.getElementsByClassName('progress')[0].style.width = 140 + 'px'
-      }
-    },
-    // 弹幕大小判断事件
-    barragejudge: function (string) {
-      let num = 0
-      for (let index = 0; index < string.length; index++) {
-        if (string.charAt(index).match(/[\u4e00-\u9fa5]/)) {
-          num++
-        }
-      }
-      num += string.length
-      return num
-    },
-    // 弹幕事件
-    addbarrage: function (ev) {
-      let toElement = ev.toElement
-      // console.log(ev)
-      var ba = toElement.children[2]
-      // console.log(ba.children[2].innerText)
-      let num = this.barragejudge(ba.children[this.k].innerText) * -9
-      ba.children[this.k].style.left = num + 'px'
-      ba.children[this.k].style.transition = 'left 5s linear'
-      ++this.k
-      if (this.k > ba.children.length - 1) {
-        clearInterval(this.barragetime)
-        for (let index = 0; index < ba.children.length; index++) {
-          ba.children[index].removeAttribute('style')
-        }
-        this.k = 0
-        this.barragetime = setInterval(this.addbarrage, 2000, ev)
-      }
-    },
-    // 移入生成弹幕
-    seenterbarrgage: function (ev) {
-      // 定时增加1
+    // 动画模块table切换
+    animationTable: function (ev) {
+      this.thistable = 0
       let target = ev.target
-      let dmnode = target.children[2].children
-      for (let dm = 0; dm < dmnode.length; dm++) {
-        if (dm % 2 === 0 && dm.className === 'dm row2') {
-          dmnode[dm].className += ' row2'
+      let animationchild = target.parentNode.children
+      for (let index = 0; index < animationchild.length; index++) {
+        animationchild[index].className = ''
+      }
+      // console.log(target.nodeName)
+      if (target.nodeName === 'SPAN') {
+        target.className = 'on'
+        // console.log(target.innerText)
+        if (target.innerText === '最新投稿') {
+          this.animationbooler = -1
+        } else {
+          this.animationbooler = 1
         }
       }
-      target.getElementsByClassName('bar')[0].style.display = 'block'
-      target.getElementsByClassName('danmu-module')[0].style.display = 'block'
-      this.barragetime = setInterval(this.addbarrage, 2000, ev)
     },
-    // 移出停止弹幕
-    leavebarrgage: function (ev) {
-      clearInterval(this.barragetime)
-      let target = ev.target
-      target.getElementsByClassName('danmu-module')[0].style.display = 'none'
-      target.getElementsByClassName('bar')[0].style.display = 'none'
+    // 动画模块新动态点击
+    clickfresh: function () {
+      this.$refs.refresh.style.opacity = '0'
+      this.opacity = 1
+      this.thistable = 1
+    },
+    // 动画table
+    animationchage: function (thistable) {
+      if (thistable === 1) {
+        if (this.animationbooler === 1) {
+          for (let i = 0; i < 10; i++) {
+            this.tandata[i] = this.animationvideovalue[Math.floor(Math.random() * (this.animationvideovalue.length - 10) + 10)]
+          }
+        } else {
+          for (let i = 0; i < 10; i++) {
+            this.tandata[i] = this.newanimationvideos[Math.floor(Math.random() * (this.newanimationvideos.length - 10) + 10)]
+          }
+        }
+      } else {
+        if (this.animationbooler === 1) {
+          for (let i = 0; i < 10; i++) {
+            this.tandata[i] = this.animationvideovalue[i]
+          }
+        } else {
+          for (let i = 0; i < 10; i++) {
+            this.tandata[i] = this.newanimationvideos[i]
+          }
+        }
+      }
+      return this.tandata
+    },
+    // 给每个video加media
+    videoaddmedia (id) {
+      // console.log(this.mediaall[id])
+      return this.mediaall[id]
+    }
+  },
+  watch: {
+    opacity (val) {
+      // 更新动画
+      setTimeout(() => {
+        this.$refs.refresh.style.opacity = '1'
+        this.opacity = 0
+      }, 2200)
     }
   }
 }

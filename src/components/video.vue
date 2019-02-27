@@ -1,31 +1,42 @@
 <template>
-  <div class="back-video"
-       @mousemove="backVideo($event)"
-       @mouseenter="seenterbarrgage($event)"
-       @mouseleave="leavebarrgage($event)">
-    <div class="mask-shadow"></div>
-    <div class="bar"
-         style="display:none;">
-      <div class="progress"></div>
+  <router-link :to="{name:'media',params:{h1:videovalue.title,view:media.view,dmall:media.dmall,media:media.media}}"
+               tag="div">
+    <div class="back-video"
+         @mousemove="backVideo($event),hovermouse ($event) "
+         @mouseenter="seenterbarrgage($event)"
+         @mouseleave="leavebarrgage($event)">
+      <div class="video-fristimg"><img :src="videovalue.fristimg"
+             alt=""></div>
+      <div class="video-imgmovehidden">
+        <div class="video-imgmove"
+             :style="{ backgroundImage : 'url('+videovalue.img +')',backgroundSize:'1600px'}"
+             ref="changeimage"></div>
+      </div>
+      <div class="mask-shadow"></div>
+      <div class="bar"
+           style="display:none;">
+        <div class="progress"></div>
+      </div>
+      <div class="danmu-module"
+           style="display:none;">
+        <p class="dm"
+           v-for="(p , index) in videovalue.ps"
+           :key='index'>{{p.text}}</p>
+        <time>{{videovalue.videotime}}</time>
+      </div>
     </div>
-    <div class="danmu-module"
-         style="display:none;">
-      <p class="dm"
-         v-for="(p , index) in videovalue.ps"
-         :key='index'>{{p.text}}</p>
-      <time>{{videovalue.videotime}}</time>
-    </div>
-    <p class="mask-title"
-       title="video.title">{{videovalue.title}}</p>
-  </div>
+  </router-link>
 </template>
 <style lang="less" scoped>
+.videoheight {
+  height: 150px;
+}
 .back-video {
   width: 160px;
   height: 100px;
   border-radius: 4px;
-  background-color: red;
-  margin: 0 20px 20px 0;
+  background-color: #212121;
+  // margin: 0 20px 20px 0;
   position: relative;
   float: left;
   cursor: pointer;
@@ -33,13 +44,17 @@
     .mask-shadow {
       opacity: 0.5;
     }
+    .video-fristimg {
+      opacity: 0;
+    }
   }
   .danmu-module {
     width: 100%;
     height: 100%;
-    position: relative;
+    position: absolute;
     top: -3px;
     overflow: hidden;
+    z-index: 11;
   }
   .mask-title {
     position: absolute;
@@ -57,12 +72,42 @@
     background-color: #6d757a;
     opacity: 0;
     position: absolute;
+    top: 0;
+  }
+  .video-fristimg {
+    opacity: 1;
+    height: 100px;
+    width: 160px;
+    border-radius: 4px;
+    background-color: #6d757a;
+    position: absolute;
+    z-index: 1;
+    img {
+      width: 100%;
+      height: 100%;
+      border-radius: 4px;
+    }
+  }
+  .video-imgmovehidden {
+    height: 100px;
+    width: 160px;
+    overflow: hidden;
+    .video-imgmove {
+      width: 160px;
+      height: 100px;
+      margin-top: 20px;
+    }
   }
   .bar {
     width: 140px;
     height: 3px;
     margin: auto;
     background-color: #000;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 5px;
+    z-index: 2;
     .progress {
       width: 1px;
       height: 3px;
@@ -91,7 +136,7 @@
 <script>
 export default {
   name: 'Video',
-  props: ['videovalue'],
+  props: ['videovalue', 'media'],
   created: function () {
   },
   mounted: function () {
@@ -121,9 +166,8 @@ export default {
     // 弹幕事件
     addbarrage: function (ev) {
       let toElement = ev.toElement
-      console.log(ev)
-      var ba = toElement.children[2]
-      // console.log(ba.children[2].innerText)
+      var ba = toElement.children[4]
+      // console.log(ba.children[4].innerText)
       let num = this.barragejudge(ba.children[this.k].innerText) * -9
       ba.children[this.k].style.left = num + 'px'
       ba.children[this.k].style.transition = 'left 5s linear'
@@ -142,6 +186,7 @@ export default {
       // 定时增加1
       let target = ev.target
       let dmnode = target.children[2].children
+
       for (let dm = 0; dm < dmnode.length; dm++) {
         if (dm % 2 === 0 && dm.className === 'dm row2') {
           dmnode[dm].className += ' row2'
@@ -157,6 +202,13 @@ export default {
       let target = ev.target
       target.getElementsByClassName('danmu-module')[0].style.display = 'none'
       target.getElementsByClassName('bar')[0].style.display = 'none'
+    },
+    // 鼠标切换图片效果
+    hovermouse (ev) {
+      let current = ev.currentTarget || ev.srcElement
+      let positionX = current.getElementsByClassName('progress')[0].style.width.slice(-4, -3)
+      let positionY = parseInt(current.getElementsByClassName('progress')[0].style.width) >= 100 ? current.getElementsByClassName('progress')[0].style.width.slice(0, 1) : 0
+      this.$refs.changeimage.style.backgroundPosition = positionX * 160 + 'px ' + -positionY * 100 + 'px'
     }
   }
 }

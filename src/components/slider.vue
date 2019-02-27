@@ -3,10 +3,11 @@
     <ul class="slidershow"
         @mouseenter="sliderstop()"
         @mouseleave="slideropen()">
-      <li v-for="(todo,index) in slidershow"
-          :key="index"
-          v-bind:style="{backgroundImage:'url(/static/images/'+todo.img+')'}">
-      </li>
+      <router-link :to="{name:'media',params:{h1:slidershow.title,view:slidershow.view,dmall:slidershow.dmall,media:slidershow.media}}"
+                   tag='li'
+                   v-for="(todo,index) in slidershow"
+                   :key="index"
+                   v-bind:style="{backgroundImage:'url(/static/images/'+todo.img+')'}"></router-link>
     </ul>
     <p class="masklidertext"
        :key='slidershow.p'>{{slidershow[0].p }}</p>
@@ -74,7 +75,6 @@ export default {
     for (let i = 0; i < this.dom('dot').children.length; i++) {
       this.dom('dot').children[i].index = i
       this.arr[i] = this._props.slidershow[i].p
-      // console.log(this.arr[i])
     }
   },
   created: function () {
