@@ -12,12 +12,14 @@
         <li> <input type='text'
                  placeholder="你的手机号/邮箱"
                  name='username'
+                 v-model="username"
                  autocomplete="off">
           <i class="error"></i>
           <p class='text'></p>
         </li>
         <li><input type='password'
                  name='password'
+                 v-model="password"
                  placeholder='密码'>
           <i class="error"></i>
           <p class='text'></p>
@@ -36,7 +38,8 @@
           </div>
         </li>
         <li>
-          <a class='login btn'>登录</a>
+          <a class='login btn'
+             @click="login()">登录</a>
           <router-link to='/register'
                        class='register btn'>注册</router-link>
         </li>
@@ -119,10 +122,18 @@ input {
 </style>
 <script>
 import heade from '@/components/header'
+import axios from 'axios'
 export default {
   name: 'login',
   components: {
-    vHeader: heade
+    vHeader: heade,
+    username: '',
+    password: ''
+  },
+  methods: {
+    login () {
+      axios.post('/api/login')
+    }
   }
 }
 </script>

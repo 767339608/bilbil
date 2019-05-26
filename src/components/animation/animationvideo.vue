@@ -16,7 +16,7 @@
              @click='clickfresh()'
              ref='refresh'>
           <i></i>
-          <span>{{newvideo}}</span>
+          <span>{{this.$store.state.newvideo}}</span>
           <span>条新动态</span>
         </div>
         <a href=""
@@ -28,9 +28,9 @@
       <li v-for="(video , index) in animationchage(thistable)"
           :key="index">
         <v-Video :videovalue='video'
-                 :media="mediaall['0001']">
+                 :id='video.mediaid'>
+          <p class='video-title'>{{video.title}}</p>
         </v-Video>
-        <p class='video-title'>{{video.title}}</p>
       </li>
     </ul>
   </div>
@@ -160,6 +160,7 @@
 
 <script>
 import Video from '@/components/video'
+import { mapGetters } from 'vuex'
 export default {
   name: 'animationvideo',
   components: {
@@ -173,7 +174,6 @@ export default {
       thistable: 0
     }
   },
-  props: ['animationvideovalue', 'newanimationvideos', 'mediaall', 'newvideo'],
   methods: {
     // 动画模块table切换
     animationTable: function (ev) {
@@ -183,10 +183,8 @@ export default {
       for (let index = 0; index < animationchild.length; index++) {
         animationchild[index].className = ''
       }
-      // console.log(target.nodeName)
       if (target.nodeName === 'SPAN') {
         target.className = 'on'
-        // console.log(target.innerText)
         if (target.innerText === '最新投稿') {
           this.animationbooler = -1
         } else {
@@ -205,21 +203,21 @@ export default {
       if (thistable === 1) {
         if (this.animationbooler === 1) {
           for (let i = 0; i < 10; i++) {
-            this.tandata[i] = this.animationvideovalue[Math.floor(Math.random() * (this.animationvideovalue.length - 10) + 10)]
+            this.tandata[i] = this.$store.state.animationvideos[Math.floor(Math.random() * (this.$store.state.animationvideos.length - 10) + 10)]
           }
         } else {
           for (let i = 0; i < 10; i++) {
-            this.tandata[i] = this.newanimationvideos[Math.floor(Math.random() * (this.newanimationvideos.length - 10) + 10)]
+            this.tandata[i] = this.$store.state.newanimationvideos[Math.floor(Math.random() * (this.$store.state.newanimationvideos.length - 10) + 10)]
           }
         }
       } else {
         if (this.animationbooler === 1) {
           for (let i = 0; i < 10; i++) {
-            this.tandata[i] = this.animationvideovalue[i]
+            this.tandata[i] = this.$store.state.animationvideos[i]
           }
         } else {
           for (let i = 0; i < 10; i++) {
-            this.tandata[i] = this.newanimationvideos[i]
+            this.tandata[i] = this.$store.state.newanimationvideos[i]
           }
         }
       }
@@ -227,7 +225,6 @@ export default {
     },
     // 给每个video加media
     videoaddmedia (id) {
-      // console.log(this.mediaall[id])
       return this.mediaall[id]
     }
   },
@@ -239,6 +236,11 @@ export default {
         this.opacity = 0
       }, 2200)
     }
+  },
+  computed: {
+    ...mapGetters([
+      'mediaid'
+    ])
   }
 }
 </script>

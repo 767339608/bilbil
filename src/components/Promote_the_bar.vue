@@ -4,8 +4,8 @@
       <h1>推广</h1>
     </figure>
     <div class="people-counting">
-      <span :title="'在线观看'+promatebar[0].readpeople">在线人数{{promatebar[0].people}}</span>
-      <span>最新投稿:{{promatebar[0].contribute}}</span>
+      <span :title="'在线观看'+this.$store.state.promatebar.readpeople">在线人数{{this.$store.state.promatebar.people}}</span>
+      <span>最新投稿:{{this.$store.state.promatebar.contribute}}</span>
     </div>
   </div>
 </template>
@@ -46,7 +46,6 @@
 </style>
 <script>
 export default {
-  name: 'promate',
-  props: ['promatebar']
+  name: 'promate'
 }
 </script>

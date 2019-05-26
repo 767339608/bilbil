@@ -5,8 +5,7 @@
           :title='url.title'
           :key='index'>
         {{url.id}}
-        <router-link :to="{name:'media',params:{h1:url.title,view:mediaall[`0001`].view,dmall:mediaall['0001'].dmall,media:mediaall['0001'].media}}"
-                     :data-id='url.id'>
+        <router-link :to="{name:'media',params:{h1:url.title,id:url.mediaid}}">
           <img :src='url.img'
                alt="">
           <div class="imgshadow"><span class='title'>{{url.title}}</span></div>
@@ -89,9 +88,9 @@
 }
 </style>
 <script>
+import { mapGetters } from 'vuex'
 export default {
   name: 'asidetable',
-  props: ['imgurl', 'weekimgurl', 'yestimgurl', 'mediaall'],
   data () {
     return {
       imgstate: 0,
@@ -99,20 +98,15 @@ export default {
       left: '昨日'
     }
   },
-  watch: {
-    id: function () {
-      console.log(this.id)
-    }
-  },
   methods: {
     // 切换
     parameter () {
       if (this.imgstate === 0) {
-        return this.imgurl
+        return this.$store.state.imgurl
       } else if (this.imgstate === 1) {
-        return this.weekimgurl
+        return this.$store.state.weekimgurl
       } else if (this.imgstate === 2) {
-        return this.yestimgurl
+        return this.$store.state.yestimgurl
       }
     },
     // 右侧
@@ -147,6 +141,11 @@ export default {
         this.imgstate = 0
       }
     }
+  },
+  computed: {
+    ...mapGetters([
+      'mediaid'
+    ])
   }
 }
 </script>

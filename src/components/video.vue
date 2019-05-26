@@ -1,5 +1,5 @@
 <template>
-  <router-link :to="{name:'media',params:{h1:videovalue.title,view:media.view,dmall:media.dmall,media:media.media}}"
+  <router-link :to="{name:'media',params:{h1:videovalue.title,id:id}}"
                tag="div">
     <div class="back-video"
          @mousemove="backVideo($event),hovermouse ($event) "
@@ -24,6 +24,7 @@
            :key='index'>{{p.text}}</p>
         <time>{{videovalue.videotime}}</time>
       </div>
+      <slot class='back-name'></slot>
     </div>
   </router-link>
 </template>
@@ -136,7 +137,7 @@
 <script>
 export default {
   name: 'Video',
-  props: ['videovalue', 'media'],
+  props: ['videovalue', 'id'],
   created: function () {
   },
   mounted: function () {

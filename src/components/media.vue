@@ -4,40 +4,46 @@
       <!-- 播放 -->
       <div class="video-info">
         <h1 class='video-title'
-            :title='this.$route.params.h1'>{{this.$route.params.h1}}</h1>
+            :title='medianame(this.$route.params.id)'>{{medianame(this.$route.params.id)}}</h1>
         <div class="video-data"></div>
         <div class="video-data">
           <span class='view'
-                :title="'总播放数'+this.$route.params.view">{{keeptwo(this.$route.params.view)+'播放'}}&nbsp;&nbsp;</span>
+                :title="'总播放数'+mediaview(this.$route.params.id)">{{conversion(mediaview(this.$route.params.id))+'播放'}}&nbsp;&nbsp;</span>
           <span class='dm'
-                :title="'历史累计弹幕'+this.$route.params.dmall">{{keeptwo(this.$route.params.dmall)+'弹幕'}}</span>
+                :title="'历史累计弹幕'+this.dmtexts.length">{{conversion(this.dmtexts.length)+'弹幕'}}</span>
           <span class='copyright'>未经作者授权，禁止转载
           </span>
         </div>
       </div>
       <!-- 视频 -->
-      <div class="play">
+      <div class="play"
+           ref='play'>
         <div class="video-warp">
           <div class="video-top"></div>
-          <div class="video-state">
+          <div class="video-state"
+               ref='videostate'>
             <img src="static/images/start.png"
                  alt=""
                  @click="start($event)">
           </div>
-          <div class="video">
-            <video :src="this.$route.params.media"
+          <div class="video"
+               @click='pasued($event)'>
+            <video :src="mediavideo(this.$route.params.id)"
                    preload=auto
-                   id='media'
-                   @click='pasued($event)'></video>
+                   id='media'></video>
           </div>
+          <!-- 视频底部功能 -->
           <div class="video-control">
             <div class="video-control-top">
               <div class="video-control-progress"
                    @click='progressblur($event)'
                    @mousemove="onmoveframes($event)"
-                   @mouseout="onoutframes()">
-                <div class="video-control-progress-grey"></div>
-                <div class="video-control-progress-blue"></div>
+                   @mouseout="onoutframes()"
+                   ref='progress'>
+                <div class="video-control-progress-grey"
+                     ref='pargressgrey'></div>
+                <div class="video-control-progress-blue"
+                     ref='pargressblue'></div>
               </div>
               <div class="video-control-images"
                    ref='images'>
@@ -55,7 +61,7 @@
                      @click='pasued($event)'
                      v-else>
               </div>
-              <div class="video-control-time">{{currenttime}}/{{duration}}</div>
+              <div class="video-control-time">{{currenttime}} / {{duration}}</div>
               <div class="video-unfined"></div>
               <div class="video-control-volume"
                    @click='displayvolume'
@@ -63,7 +69,7 @@
                 <img src="static/images/volume.png"
                      alt="">
                 <div class="video-control-volume-progress"
-                     ref="progress">
+                     ref="volumeProgress">
                   <span>{{progresstext}}</span>
                   <div class="video-control-volume-blur"
                        @mousemove="volumechage($event)"
@@ -73,7 +79,8 @@
                       <div class="video-control-volume-blue"
                            ref='blue'></div>
                     </div>
-                    <div class="video-control-volume-ball"></div>
+                    <div class="video-control-volume-ball"
+                         ref='volumeball'></div>
                   </div>
                 </div>
               </div>
@@ -103,21 +110,119 @@
                  @click="createdm">发送</div>
           </div>
         </div>
+        <!-- 视频弹幕 -->
         <div class="dmtext"
              ref='dmtext'>
-          <span v-for="(dm,i) in dmtexts"
+          <span v-for="(dm,i) in mediadmtexts(this.$route.params.id)"
                 :key="i"
                 :title=i>{{dmtextchange(dm,i)}}</span>
         </div>
+      </div>
+      <!-- 小功能 -->
+      <div class="smallfeature">
+        <!-- 点赞 -->
         <div class="getlike"
              @mouseenter="imgchage($event)"
              @mouseleave="imgreset($event)"
              @click='addtext()'><img src="static/images/head.png"
                alt=""><span>{{licktext}}</span></div>
+        <!-- 星星评分 -->
+        <el-rate v-model="value3"
+                 show-text
+                 :allow-half="true"
+                 score-template='{value}'>
+        </el-rate>
+      </div>
+      <!-- 详细信息 -->
+      <p class="detail">
+        {{mediatitle(this.$route.params.id)}}
+      </p>
+      <!-- 评论功能 -->
+      <div class="commentfunction">
+        <h1 class='commenttitle'>{{mediaTotalLength(this.$route.params.id)}}<span>评论</span></h1>
+        <!-- 分页 -->
+        <div class="paging">
+          <ul class="pagingleft"
+              @click='pagcolor($event)'>
+            <li>
+              <h3 class='on'>全部评论</h3>
+            </li>
+            <li>
+              <h3>按热度排序</h3>
+            </li>
+          </ul>
+          <el-pagination :current-page.sync="currentPage1"
+                         :page-size="pagesize"
+                         layout="total, prev, pager, next"
+                         :total="mediaTotalLength(this.$route.params.id)">
+          </el-pagination>
+        </div>
+      </div>
+      <!-- 回复 -->
+      <div class="reply">
+        <v-comment :placeholder="placeholder"
+                   :level='1'></v-comment>
+        <div class="reply-middle">
+          <v-reply :total='mediaTotal(this.$route.params.id)'
+                   :pagesize='pagesize'
+                   :currentPage1='currentPage1'></v-reply>
+        </div>
       </div>
     </div>
-    <!-- 其他功能 -->
-    <div class="right"></div>
+    <!-- 右侧功能 -->
+    <div class="right"
+         ref='right'>
+      <!-- 投稿人 -->
+      <!-- 弹幕列表 -->
+      <div class="dm-item">
+        <div class="dm-item-header"
+             @click='unfolddmItem()'>
+          <div class="dm-item-header-left">
+            <span class='dm-item-title'>弹幕列表</span>
+          </div>
+          <span>{{unfold}}</span>
+        </div>
+        <div class="dm-item-main"
+             ref='dmItemMain'>
+          <div class="dm-item-main-title"
+               @click='dmsort($event)'>
+            <h3>时间</h3>
+            <h3>弹幕内容({{dmtexts.length}})</h3>
+            <h3>发送时间</h3>
+          </div>
+          <ul class='dm-item-main-ul'>
+            <li class="dm-item-main-li"
+                v-for='(time,index) in dmtexts'
+                :key='index'>
+              <span class="dm-item-main-left">{{time.time}}</span>
+              <span class="dm-item-main-middle">{{time.text}}</span>
+              <span class="dm-item-main-right">{{time.sendtime}}</span>
+              <div class="dm-item-button">
+                <button>屏蔽用户</button>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <!-- 相关推荐 -->
+      <div class="associativeFunction">
+        <h2>相关推荐</h2>
+        <ul class="associtivevideo">
+          <li v-for="(video,index) in videos"
+              :key='index'>
+            <v-video :videovalue="video"
+                     :id='video.mediaid'></v-video>
+            <div class="associtveright">
+              <p>{{video.title}}</p>
+              <span>{{username(video.nameid)}}</span><br>
+              <span>{{conversion(mediaview(video.mediaid))}}播放</span>
+              <span>{{conversion(mediadmlength(video.mediaid))}}弹幕</span>
+            </div>
+
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
 </template>
 <style lang="less" scoped>
@@ -153,27 +258,43 @@
     line-height: 18px;
   }
 }
+// 左侧
+.left {
+  width: 127%;
+  margin-right: 50px;
+}
 .play {
-  width: 638px;
   position: relative;
   overflow: hidden;
+  .play-bottom {
+    padding-bottom: 10px;
+    margin-top: 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  }
 }
 .maxwidth {
-  position: static !important ;
-  width: 100% !important ;
-  height: 100% !important ;
+  width: 988px;
 }
-.getlike {
-  display: inline-block;
-  &:hover {
-    color: #00a1d6;
-    cursor: pointer;
-  }
-  img {
-    width: 30px;
-    vertical-align: middle;
+.smallfeature {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  .getlike {
+    margin-right: 20px;
+    display: inline-block;
+    &:hover {
+      color: #00a1d6;
+      cursor: pointer;
+    }
+    img {
+      width: 30px;
+      vertical-align: middle;
+    }
   }
 }
+//视频
 .video-warp {
   position: relative;
   display: flex;
@@ -270,7 +391,7 @@ video {
     color: white;
   }
   .video-unfined {
-    width: 400px;
+    width: 57%;
   }
 }
 .video-control-volume {
@@ -290,7 +411,10 @@ video {
   display: none;
   text-align: center;
   span {
+    display: inline-block;
     color: white;
+    margin-top: 11px;
+    margin-bottom: 3px;
   }
 }
 .video-control-volume-blur {
@@ -402,10 +526,211 @@ video {
   transition: transform 10s;
   transform: translateX(-700px);
 }
+.paging {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  margin-top: 20px;
+  border-bottom: 0.5x solid rgba(0, 0, 0, 0.1);
+  ul {
+    display: flex;
+    li {
+      cursor: pointer;
+      h3 {
+        border-bottom: 1px solid transparent;
+      }
+    }
+    li:first-child {
+      margin-right: 10px;
+    }
+  }
+}
+.el-pagination {
+  min-width: 0;
+  .li {
+    min-width: 20px;
+  }
+}
+.on {
+  position: relative;
+  color: #00a1d6;
+  padding-bottom: 4px;
+  border-color: #00a1d6 !important;
+  &:before {
+    display: block;
+    content: "";
+    left: 50%;
+    position: absolute;
+    margin-left: -3px;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    border-bottom: 3px solid #00a1d6;
+    border-top: 0;
+    border-left: 3px dashed transparent;
+    border-right: 3px dashed transparent;
+  }
+}
+.detail {
+  margin-top: 20px;
+}
+.commenttitle {
+  margin-top: 20px;
+  font-weight: 400;
+  font-size: 18px;
+  span {
+    margin-left: 5px;
+  }
+}
+.smallfeature,
+.detail,
+.commentfunction,
+.reply {
+  display: inline-block;
+  width: 582px;
+}
+.reply {
+  margin-top: 30px;
+  .reply-middle {
+    padding-top: 30px;
+    border-top: 0.5px solid rgba(0, 0, 0, 0.1);
+  }
+  .comment {
+    margin-bottom: 30px;
+  }
+}
+.right {
+  width: 77%;
+  .dm-item-header {
+    display: flex;
+    vertical-align: middle;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    height: 46px;
+    width: 100%;
+    background: #f4f4f4;
+    color: #222;
+    border-radius: 2px;
+    cursor: pointer;
+    box-sizing: border-box;
+    .dm-item-title {
+      font-size: 16px;
+      color: #222;
+    }
+  }
+  .dm-item-main {
+    height: 0;
+    transition: height 0.5s;
+    overflow: hidden;
+    .dm-item-main-title {
+      display: flex;
+      height: 40px;
+      line-height: 40px;
+      cursor: pointer;
+      h3 {
+        font-weight: 400;
+        font-size: 12px;
+        color: #6d757a;
+        text-align: left;
+      }
+    }
+    .dm-item-main-ul {
+      overflow-x: hidden;
+      height: 447px;
+      font-size: 12px;
+    }
+    .dm-item-main-li {
+      display: flex;
+      height: 25px;
+      line-height: 25px;
+      position: relative;
+      cursor: pointer;
+      &:hover {
+        .dm-item-button {
+          display: block;
+        }
+      }
+      .dm-item-button {
+        position: absolute;
+        right: 31px;
+        display: none;
+        button {
+          background-color: white;
+          color: #03a0d6;
+          border: 1px solid #03a0d6;
+          border-radius: 4px;
+          &:hover {
+            background-color: #03a0d6;
+            color: white;
+          }
+        }
+      }
+    }
+    h3:first-child,
+    .dm-item-main-left {
+      width: 60px;
+      padding-left: 10px;
+      color: #6d757a;
+    }
+    h3:nth-of-type(2),
+    .dm-item-main-middle {
+      width: 170px;
+      text-align: left;
+    }
+    .dm-item-main-right {
+      color: #6d757a;
+    }
+  }
+  .dm-item-on {
+    height: 487px;
+  }
+  .dm-item-off {
+    height: 0;
+  }
+  .associativeFunction {
+    h2 {
+      font-size: 16px;
+      color: #222;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      font-weight: 400;
+    }
+    .associtivevideo {
+      display: flex;
+      flex-direction: column;
+      li {
+        margin-bottom: 20px;
+        display: flex;
+        p {
+          margin-bottom: 10px;
+        }
+        .associtveright {
+          margin-left: 10px;
+        }
+        span {
+          color: #999;
+          margin-bottom: 4px;
+          font-size: 12px;
+        }
+      }
+    }
+  }
+}
 </style>
 <script>
+import comment from '@/components/reply/comment'
+import reply from '@/components/reply/reply'
+import video from '@/components/video'
+import { mapState, mapGetters } from 'vuex'
 export default {
   name: 'media',
+  components: {
+    vComment: comment,
+    vReply: reply,
+    vVideo: video
+  },
   data: function () {
     return {
       currenttime: '00:00',
@@ -414,45 +739,27 @@ export default {
       progresstext: 0,
       volumestate: 1,
       framestext: '00:00',
-      dmtexts: [
-        {
-          'time': '00:05',
-          'text': '哇这也太好看了吧'
-        },
-        {
-          'time': '00:12',
-          'text': '666'
-        },
-        {
-          'time': '00:15',
-          'text': '2333'
-        },
-        {
-          'time': '00:25',
-          'text': '151515'
-        },
-        {
-          'time': '00:35',
-          'text': '牛逼啊'
-        },
-        {
-          'time': '00:45',
-          'text': '卢本伟牛逼'
-        }
-      ],
-      licktext: 0
+      dmtexts: [],
+      licktext: 0,
+      value3: 4.2,
+      currentPage1: 1,
+      pagesize: 5,
+      placeholder: '请自觉遵守互联网相关的政策法规，严禁发布色情、暴力、反动的言论。',
+      unfold: '展开',
+      videoswitch: false
     }
   },
   mounted: function () {
+    this.dmtexts = this.mediadmtexts(this.$route.params.id)
     this.media = document.getElementById('media')
-    this.state = this.dom('video-state').children[0]
+    this.state = this.$refs.videostate.children[0]
     // 总时长获取
     setTimeout(() => {
       this.duration = this.changetime(this.media.duration)
     }, 800)
     // 音量初始值设置
-    this.dom('video-control-volume-ball').style.transform = 'translateY(' + -this.media.volume * 50 + 'px)'
-    this.dom('video-control-volume-blue').style.height = this.media.volume * 50 + 'px'
+    this.$refs.volumeball.style.transform = 'translateY(' + -this.media.volume * 50 + 'px)'
+    this.$refs.blue.style.height = this.media.volume * 50 + 'px'
     this.progresstext = this.media.volume * 100
   },
   methods: {
@@ -464,43 +771,50 @@ export default {
         return this.$el.getElementsByClassName(value)[0]
       }
     },
-    // 转化成万为单位
-    keeptwo: function (num) {
-      return num > 10000 ? (Math.floor(num / 1000) / 10 + '万') : num
-    },
     // 开始
-    start: function (event) {
+    start (event) {
       this.media.play()
       this.state.style.display = 'none'
       this.chagestate = false
       this.time = setInterval(this.changeblur, 1000)
+      this.videoswitch = false
     },
     // 暂停
-    pasued: function (event) {
-      this.media.pause()
-      this.chagestate = true
-      this.state.style.display = 'block'
-      clearInterval(this.time)
+    pasued (event) {
+      // console.log(this.videoswitch)
+      if (this.videoswitch) {
+        this.videoswitch = false
+        this.media.pause()
+        this.chagestate = false
+        this.state.style.display = 'block'
+        clearInterval(this.time)
+      } else {
+        this.videoswitch = true
+        this.media.play()
+        this.state.style.display = 'none'
+        this.chagestate = false
+        this.time = setInterval(this.changeblur, 1000)
+      }
     },
     // 进度条变化
-    changeblur: function () {
+    changeblur () {
       let time = Math.floor(this.media.currentTime) / Math.floor(this.media.duration)
       this.currenttime = this.changetime(this.media.currentTime)
       this.duration = this.changetime(this.media.duration)
-      let blue = this.dom('video-control-progress-blue')
+      let blue = this.$refs.pargressblue
       blue.style.width = time * 100 + '%'
     },
     // 鼠标点击切换进度条
-    progressblur: function (ev) {
+    progressblur (ev) {
       let current = ev.currentTarget
-      let left = this.dom('video-control-progress-grey').getBoundingClientRect().left
+      let left = this.$refs.pargressgrey.getBoundingClientRect().left
       let length = Math.floor(ev.clientX - left)
-      this.dom('video-control-progress-blue').style.width = length + 'px'
+      this.$refs.pargressblue.style.width = length + 'px'
       this.media.currentTime = Math.floor(this.media.duration * length / current.offsetWidth)
       this.changeblur()
     },
     // 截取帧
-    capureimg: function (width, heigth) {
+    capureimg (width, heigth) {
       let canves = document.createElement('canvas')
       canves.width = width
       canves.height = heigth
@@ -508,12 +822,13 @@ export default {
       return canves.toDataURL('images/png')
     },
     // 拖动显示帧
-    onmoveframes: function (ev) {
-      this.dom('video-control-progress').style.height = '3.5px'
-      this.dom('video-control-images').style.display = 'block'
-      let left = this.dom('video-control-progress-grey').getBoundingClientRect().left
+    onmoveframes (ev) {
+      this.$refs.progress.style.height = '3.5px'
+      this.$refs.images.style.display = 'block'
+      let left = this.$refs.pargressgrey.getBoundingClientRect().left
+
       let length = Math.floor(ev.clientX - left)
-      this.framestext = this.changetime(this.media.duration * (length / this.dom('video-control-progress').offsetWidth))
+      this.framestext = this.changetime(this.media.duration * (length / this.$refs.progress.offsetWidth))
       this.$refs.images.style.left = length - 25 + 'px'
       if (this.dom('framesimg')) {
         this.$refs.images.removeChild(this.dom('framesimg'))
@@ -525,12 +840,13 @@ export default {
     },
     // 移出帧显示
     onoutframes () {
-      this.dom('video-control-progress').removeAttribute('style')
-      this.dom('video-control-images').style = 'none'
+      this.$refs.progress.removeAttribute('style')
+      this.$refs.images.style = 'none'
     },
     // 秒转化成时间
-    changetime: function (time) {
+    changetime (time) {
       time = Math.floor(time)
+      // console.log(time)
       let minute = time > 60 ? Math.floor(time / 60) : '0'
       let second = Math.floor(time % 60)
       let date = (minute >= 10 ? minute : '0' + minute) + ':' + (second >= 10 ? second : '0' + second)
@@ -538,29 +854,31 @@ export default {
     },
     // 时间转换成数字
     onnumber (time) {
-      return Number(time.split(':').join(''))
+      let arrnum = time.split(':')
+      let num = Number(arrnum[0]) * 60 + Number(arrnum[1])
+      return num
     },
     // 音量显示
-    displayvolume: function () {
+    displayvolume () {
       this.volumestate = -this.volumestate
       if (this.volumestate === -1) {
-        this.$refs.progress.style.display = 'block'
+        this.$refs.volumeProgress.style.display = 'block'
       } else {
-        this.$refs.progress.style.display = 'none'
+        this.$refs.volumeProgress.style.display = 'none'
       }
     },
     // 音量变化事件
-    volumechage: function (ev) {
+    volumechage (ev) {
       let length = Math.floor(Math.abs(ev.clientY - this.$refs.volume.getBoundingClientRect().bottom))
       if (length <= 50) {
-        this.dom('video-control-volume-ball').style.transform = 'translateY(' + -length + 'px)'
+        this.$refs.volumeball.style.transform = 'translateY(' + -length + 'px)'
         this.progresstext = length * 2
         this.$refs.blue.style.height = length + 'px'
         this.media.volume = length * 2 * 0.01
       }
     },
     // 全屏兼容
-    launchFullscreen: function (element) {
+    launchFullscreen (element) {
       // 此方法不可以在異步任務中執行，否則火狐無法全屏
       if (element.requestFullscreen) {
         element.requestFullscreen()
@@ -589,10 +907,14 @@ export default {
     },
     // 宽屏
     maxwidth () {
-      if (this.dom('play').className === 'play maxwidth') {
-        this.dom('play').className = 'play'
+      if (this.$refs.play.classList.contains('maxwidth')) {
+        console.log(this.$refs.right.style.transform)
+        this.$refs.right.removeAttribute('style')
+
+        this.$refs.play.classList.remove('maxwidth')
       } else {
-        this.dom('play').className += ' maxwidth'
+        this.$refs.right.style.transform = 'translate(-339px,648px)'
+        this.$refs.play.classList.add('maxwidth')
       }
     },
     // 生成弹幕
@@ -602,12 +924,9 @@ export default {
       create['text'] = this.$refs.dminput.value
       this.dmtexts.push(create)
       this.$refs.dminput.value = ''
-
-      // console.log(this.dmtexts)
     },
     // 弹幕判断
     dmtextchange (dm, i) {
-      console.log(i)
       if (this.onnumber(dm.time) <= this.onnumber(this.currenttime)) {
         this.$refs.dmtext.children[i].className = 'row'
         return dm.text
@@ -624,7 +943,68 @@ export default {
     },
     addtext () {
       ++this.licktext
+    },
+    // 评论修改
+    pagcolor (ev) {
+      for (let i = 0; i < ev.currentTarget.children.length; i++) {
+        ev.currentTarget.children[i].children[0].className = ''
+      }
+      if (ev.target.nodeName === 'H3') {
+        ev.target.className = 'on'
+      }
+    },
+    // 展开所有弹幕
+    unfolddmItem () {
+      if (this.unfold === '展开') {
+        this.unfold = '收起'
+        this.$refs.dmItemMain.classList.remove('dm-item-off')
+        this.$refs.dmItemMain.classList.add('dm-item-on')
+      } else {
+        this.unfold = '展开'
+        this.$refs.dmItemMain.style.height = ''
+        this.$refs.dmItemMain.classList.remove('dm-item-on')
+        this.$refs.dmItemMain.classList.add('dm-item-off')
+      }
+    },
+    // 弹幕排序
+    dmsort (ev) {
+      this.item = {}
+      if (ev.target.innerText === '时间') {
+        this.dmtexts.sort(function (a, b) {
+          return this.onnumber(a.time) - this.onnumber(b.time)
+        }.bind(this))
+      } else if (ev.target.innerText === '发送时间') {
+        console.log(2)
+      } else {
+        this.dmtexts.sort(function (a, b) {
+          return a.text.length - b.text.length
+        })
+      }
     }
+  },
+  computed: {
+    // 转化成万为单位
+    conversion () {
+      return (num) => num > 10000 ? (Math.floor(num / 1000) / 10 + '万') : num
+    },
+    ...mapState({
+      videos: 'videos'
+    }),
+    ...mapGetters([
+      'mediaid',
+      'mediavideo',
+      'medianame',
+      'mediatitle',
+      'mediadmtexts',
+      'mediaTotal',
+      'mediaTotalLength',
+      'mediadmlength',
+      'mediaview',
+      'username'
+    ])
+  },
+  destroyed () {
+    clearInterval(this.time)
   }
 }
 </script>

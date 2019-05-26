@@ -1,9 +1,10 @@
 <template>
   <div class="maskslider">
     <ul class="slidershow"
-        @mouseenter="sliderstop()"
-        @mouseleave="slideropen()">
-      <router-link :to="{name:'media',params:{h1:slidershow.title,view:slidershow.view,dmall:slidershow.dmall,media:slidershow.media}}"
+        @mouseenter.stop="sliderstop()"
+        @mouseleave.stop="slideropen()"
+        ref='slidershow'>
+      <router-link :to="{name:'media',params:{h1:todo.p,id:todo.mediaid}}"
                    tag='li'
                    v-for="(todo,index) in slidershow"
                    :key="index"
@@ -12,8 +13,9 @@
     <p class="masklidertext"
        :key='slidershow.p'>{{slidershow[0].p }}</p>
     <ul class="dot"
-        @click="dotclick($event)">
-      <li v-for='(dot,index) in slidershow'
+        @click="dotclick($event)"
+        ref='dot'>
+      <li v-for='(dot,index) in this.slidershow'
           :key='index'></li>
     </ul>
   </div>
@@ -67,67 +69,67 @@
 </style>
 
 <script >
+import { mapGetters } from 'vuex'
 export default {
   name: 'slider',
-  props: ['slidershow'],
   mounted: function () {
-    this.dom('dot').children[0].style.backgroundPosition = '-855px -727px'
-    for (let i = 0; i < this.dom('dot').children.length; i++) {
-      this.dom('dot').children[i].index = i
-      this.arr[i] = this._props.slidershow[i].p
+    this.$refs.dot.children[0].style.backgroundPosition = '-855px -727px'
+    for (let i = 0; i < this.$refs.dot.children.length; i++) {
+      this.$refs.dot.children[i].index = i
+      this.arr[i] = this.slidershow[i].p
     }
   },
-  created: function () {
-    this.main()
+  created () {
+    // 初始设置
+    this.slidershow = this.$store.state.slidershow
+    this.i = 0
+    this.dot = 0
+    this.k = 0
+    this.arr = []
+    this.time = setInterval(this.slider, 2000)
   },
   methods: {
-    // dom封装
-    dom: function (value) {
-      return this.$el.getElementsByClassName(value)[0]
-    },
-    // 初始设置
-    main: function () {
-      this.i = 0
-      this.dot = 0
-      this.k = 0
-      this.arr = []
-      this.time = setInterval(this.slider, 2000)
-    },
     // 轮播图
-    slider: function () {
-      this.dom('dot').children[this.dot].removeAttribute('style')
+    slider () {
+      this.$refs.dot.children[this.dot].removeAttribute('style')
       this.i++
-      if (this.i > this.dom('slidershow').children.length - 1) {
+      if (this.i > this.$refs.slidershow.children.length - 1) {
         this.i = 0
       }
       this.dot = this.i
-      this.dom('masklidertext').innerText = this.arr[this.dot]
-      this.dom('dot').children[this.i].style.backgroundPosition = '-855px -727px'
-      this.dom('slidershow').style.transform = 'translateX(' + this.i * -440 + 'px)'
+      this.$refs.slidershow.children[1].innerText = this.arr[this.dot]
+      this.$refs.dot.children[this.i].style.backgroundPosition = '-855px -727px'
+      this.$refs.slidershow.style.transform = 'translateX(' + this.i * -440 + 'px)'
     },
     // dot点击事件
-    dotclick: function (ev) {
+    dotclick (ev) {
       let event = window.event || ev
-      let target = event.target || event.serElement
-      console.log(event.target.index)
+      let target = event.target
       if (target.nodeName === 'LI') {
-        this.dom('dot').children[this.dot].removeAttribute('style')
+        this.$refs.dot.children[this.dot].removeAttribute('style')
         this.dot = target.index
         this.i = target.index
-        console.log(this.dot)
-        this.dom('masklidertext').innerText = this.arr[this.dot]
-        this.dom('dot').children[this.dot].style.backgroundPosition = '-855px -727px'
-        this.dom('slidershow').style.transform = 'translateX(' + this.dot * -440 + 'px)'
+        this.$refs.slidershow.children[1].innerText = this.arr[this.dot]
+        this.$refs.dot.children[this.i].style.backgroundPosition = '-855px -727px'
+        this.$refs.slidershow.style.transform = 'translateX(' + this.i * -440 + 'px)'
       }
     },
     // 轮播关闭
-    sliderstop: function () {
+    sliderstop () {
       clearInterval(this.time)
     },
     // 轮播开启
-    slideropen: function () {
+    slideropen () {
       this.time = setInterval(this.slider, 2000)
     }
+  },
+  destroyed () {
+    clearInterval(this.time)
+  },
+  computed: {
+    ...mapGetters([
+      'mediaid'
+    ])
   }
 }
 </script>

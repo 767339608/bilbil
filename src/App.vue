@@ -4,12 +4,14 @@
     <v-header :succeed='succeed'
               @quit="quit"></v-header>
     <router-view></router-view>
+    <v-footer></v-footer>
   </div>
 </template>
 
 <script>
 import heade from '@/components/header'
 import maine from '@/components/main'
+import footer from '@/components/footer'
 export default {
   name: 'App',
   data () {
@@ -26,10 +28,8 @@ export default {
   },
   components: {
     vHeader: heade,
-    vMain: maine
-  },
-  updated () {
-    // this.succeed.verify = this.$route.query.verify
+    vMain: maine,
+    vFooter: footer
   },
   computed: {
     username () {
@@ -68,6 +68,7 @@ figure {
   padding: 0;
   margin: 0;
 }
+
 body,
 a {
   font: 13px Helvetica Neue, Helvetica, Arial, Microsoft Yahei, Hiragino Sans GB,

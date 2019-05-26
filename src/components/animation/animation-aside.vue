@@ -21,9 +21,9 @@
       <div class="list"
            ref='list'>
         <ul class="animation-main">
-          <router-link :to="{name:'media',params:{h1:animationasidevalue.title,view:animationasidevalue.view,dmall:animationasidevalue.dmall,media:animationasidevalue.media}}"
+          <router-link :to="{name:'media',params:{h1:li.title,id:'0001'}}"
                        tag="li"
-                       v-for="(li,index) in animationasidevalue"
+                       v-for="(li,index) in animationasides"
                        :key='index'>
             <i :class="{changecolor:index>2}">{{index+1}}</i>
             <template v-if='index<1'>
@@ -38,7 +38,7 @@
           </router-link>
         </ul>
         <ul class="animation-main">
-          <router-link :to="{name:'media',params:{h1:animationsideOriginal.title,view:animationsideOriginal.view,dmall:animationsideOriginal.dmall,media:animationsideOriginal.media}}"
+          <router-link :to="{name:'media'}"
                        tag="li"
                        v-for="(li,index) in animationsideOriginal"
                        :key='index'>
@@ -213,9 +213,9 @@
 }
 </style>
 <script>
+import { mapState, mapGetters } from 'vuex'
 export default {
   name: 'aniamtionaside',
-  props: ['animationasidevalue', 'animationsideOriginal', 'animationsideweek'],
   data () {
     return {
       spantaday: '三日',
@@ -224,7 +224,7 @@ export default {
     }
   },
   mounted: function () {
-    this.animationthree = this.animationasidevalue
+    this.animationthree = this.$store.state.animationsideweek
   },
   methods: {
     // 日期切换点击事件
@@ -244,19 +244,27 @@ export default {
     },
     // 切换
     toggle () {
-      // console.log(this.animationsideOriginal)
       if (this.spantaday === '一周') {
         this.spantaday = '三日'
         this.ptaday = '一周'
-        this.animationasidevalue = this.animationthree
-        this.animationsideOriginal = this.animationthree
+        this.$store.state.animationasides = this.animationthree
+        this.$store.state.animationasides = this.animationthree
       } else {
-        this.animationasidevalue = this.animationsideweek
-        this.animationsideOriginal = this.animationsideweek
+        this.$store.state.animationasides = this.$store.state.animationsideweek
+        this.$store.state.animationsideOriginal = this.$store.state.animationsideweek
         this.spantaday = '一周'
         this.ptaday = '三日'
       }
     }
+  },
+  computed: {
+    ...mapState({
+      animationasides: 'animationasides',
+      animationsideOriginal: 'animationsideOriginal'
+    }),
+    ...mapGetters([
+      'mediaid'
+    ])
   }
 }
 

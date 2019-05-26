@@ -347,6 +347,7 @@
             position: absolute;
             right: 10px;
             bottom: 10px;
+            cursor: pointer;
           }
         }
       }

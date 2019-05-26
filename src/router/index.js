@@ -29,7 +29,7 @@ export default new Router({
       component: register
     },
     {
-      path: '/media',
+      path: '/media/:id',
       name: 'media',
       component: media
     }
